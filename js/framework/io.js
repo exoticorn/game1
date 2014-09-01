@@ -6,6 +6,7 @@ define(function() {
     load: function(url, responseType) {
       return new Promise(function(resolve, reject) {
         var request = new XMLHttpRequest();
+        request.open('GET', url);
         request.onreadystatechange = function() {
           if(request.readyState === 4) {
             if(request.status !== 200) {
@@ -16,7 +17,6 @@ define(function() {
           }
         };
         request.responseType = responseType || '';
-        request.open('GET', url);
         request.send();
       });
     },

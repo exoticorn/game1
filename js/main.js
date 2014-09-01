@@ -6,7 +6,7 @@ require(['game/game', 'framework/shaders', 'framework/io'], function(Game, Shade
   if(!gl) {
     io.error('Failed to create WebGL context!\n\nDoes your browser support WebGL?\nTry a recent version of Firefox, Chrome or Opera.\nIE >= 11 and Safari >= 8 should also work.');
   }
-  setTimeout(start, 250);
+  setTimeout(start, 100);
   function start() {
     Shaders.load(gl, 'shaders.glsl').then(function(shaders) {
       var game = new Game(gl, shaders);
