@@ -1,12 +1,18 @@
 'use strict';
 /* global define */
 
-define(['framework/spriterenderer'], function(SpriteRenderer) {
+define(['framework/spriterenderer', 'framework/resourcemanager', 'framework/texture'],
+    function(SpriteRenderer, ResourceManager, Texture) {
   return function(gl, shaders) {
     gl.clearColor(0, 0, 0.1, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     
     var spriteRenderer = new SpriteRenderer(gl, shaders);
+    var resourceManager = new ResourceManager(gl);
+    var texture;
+    resourceManager.load(Texture, 'gfx/pulse.png', { frames: 4, scale: 2 }).then(function(tex) {
+      texture = tex;
+    });
 
     var starShader = shaders.get('stars');
     
@@ -29,6 +35,9 @@ define(['framework/spriterenderer'], function(SpriteRenderer) {
     
     this.render = function() {
       gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.enable(gl.BLEND);
+      gl.blendEquation(gl.FUNC_ADD);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
       starShader.begin();
       gl.bindBuffer(gl.ARRAY_BUFFER, pointBuffer);
       gl.vertexAttribPointer(starShader.pos, 3, gl.FLOAT, false, 12, 0);
@@ -36,18 +45,17 @@ define(['framework/spriterenderer'], function(SpriteRenderer) {
       gl.drawArrays(gl.POINTS, 0, numStars);
       starShader.end();
       
-      var cx = gl.drawingBufferWidth / 2;
-      var cy = gl.drawingBufferHeight / 2;
-      gl.enable(gl.BLEND);
-      gl.blendEquation(gl.FUNC_ADD);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-      spriteRenderer.begin();
-      for(var i = 0; i < 1000; ++i) {
-        var x = Math.sin(time * 4.7 + i * 0.02) + Math.sin(time * 3.68 + i * 0.026);
-        var y = Math.sin(time * 3.91+ i * 0.0128) + Math.sin(time * 5.32 + i * 0.017);
-        spriteRenderer.drawPlain(cx + x * 200 - 5, cy + y* 200 - 5, 10, 10, 0.5 + Math.sin(i * 0.0214) * 0.3, 0.5 + Math.sin(i * 0.047) * 0.3, 0.5 + Math.sin(i * 0.03) * 0.3, 0.3);
+      if(texture) {
+        var cx = gl.drawingBufferWidth / 2;
+        var cy = gl.drawingBufferHeight / 2;
+        spriteRenderer.begin();
+        for(var i = 0; i < 200; ++i) {
+          var x = Math.sin(time * 1.23 + i * 0.2) + Math.sin(time * 1.023 + i * 0.26);
+          var y = Math.sin(time * 0.785+ i * 0.128) + Math.sin(time * 0.847 + i * 0.17);
+          spriteRenderer.drawFrame(cx + x * 200 - 16, cy + y* 200 - 16, texture, Math.floor(time * 8 + i * 0.75) & 3, 0.5 + Math.sin(i * 0.214) * 0.3, 0.5 + Math.sin(i * 0.47) * 0.3, 0.5 + Math.sin(i * 0.3) * 0.3, 1);
+        }
+        spriteRenderer.end();
       }
-      spriteRenderer.end();
       gl.disable(gl.BLEND);
     };
   };
