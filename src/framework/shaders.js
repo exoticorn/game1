@@ -67,12 +67,17 @@ export default function Shaders(gl, sources) {
     
     function Shader(program) {
         let numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+        this.attributes = [];
         for(let i = 0; i < numAttributes; ++i) {
-            this[gl.getActiveAttrib(program, i).name] = i;
+            let attribute = gl.getActiveAttrib(program, i);
+            this[attribute.name] = i;
+            this.attributes.push({name: attribute.name, type: attribute.type, size: attribute.size, index: i});
         }
+        this.uniforms = [];
         for(let i = 0; i < gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS); ++i) {
             let name = gl.getActiveUniform(program, i).name;
             this[name] = gl.getUniformLocation(program, name);
+            this.uniforms.push({name: name, location: this[name]});
         }
         this.begin = function() {
             gl.useProgram(program);
