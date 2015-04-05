@@ -1,14 +1,14 @@
-import io from './io.js';
+import io from './io';
 
 export default function(gl) {
-    var resources = {};
-    var releaseList = [];
+    let resources = {};
+    let releaseList = [];
     
-    var total = 0;
-    var loaded = 0;
+    let total = 0;
+    let loaded = 0;
     
     this.load = function(factory, name, config) {
-        var resource = resources[name];
+        let resource = resources[name];
         if(resource) {
             return resource;
         }
@@ -49,7 +49,7 @@ export default function(gl) {
     }
     
     this.release = function() {
-        for(var name in resources) {
+        for(let name in resources) {
             release(resources[name]);
         }
         releaseList.forEach(release);

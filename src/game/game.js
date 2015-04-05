@@ -1,34 +1,33 @@
-import SpriteRenderer from '../framework/spriterenderer.js';
-import ResourceManager from '../framework/resourcemanager.js';
-import Texture from '../framework/texture.js';
-import Shaders from '../framework/shaders.js';
-import newPlayer from './player.js';
+import SpriteRenderer from '../framework/spriterenderer';
+import ResourceManager from '../framework/resourcemanager';
+import Texture from '../framework/texture';
+import Shaders from '../framework/shaders';
+import Player from './player.js';
 
-export default function*(gl, frameworkShaders) {
-    var resourceManager = new ResourceManager(gl);
-    var texture = yield resourceManager.load(Texture, 'gfx/pulse.png', { frames: 4, scale: 2 });
-    var shaders = yield Shaders.load(gl, 'src/game/shaders.glsl');
-    var player = newPlayer(gl);
+export default function* Game(gl, frameworkShaders) {
+    let resourceManager = new ResourceManager(gl);
+    let texture = yield resourceManager.load(Texture, 'gfx/pulse.png', { frames: 4, scale: 2 });
+    let shaders = yield Shaders.load(gl, 'src/game/shaders.glsl');
+    let player = new Player(gl);
     
-    function Game() {
-        gl.clearColor(0, 0, 0.1, 1);
+    gl.clearColor(0, 0, 0.1, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    
+    let spriteRenderer = new SpriteRenderer(gl, frameworkShaders);
+    
+    this.update = function(ctx) {
+        player.update(ctx);
+    };
+    
+    this.render = function() {
         gl.clear(gl.COLOR_BUFFER_BIT);
         
-        var spriteRenderer = new SpriteRenderer(gl, frameworkShaders);
+        spriteRenderer.begin();
         
-        this.update = function(ctx) {
-            player.update(ctx);
-        };
-        
-        this.render = function() {
-            gl.clear(gl.COLOR_BUFFER_BIT);
-            
-            spriteRenderer.begin();
-            
-            player.render(spriteRenderer);
+        player.render(spriteRenderer);
 
-            spriteRenderer.end();
-        };
-    }
-    return new Game();
+        spriteRenderer.end();
+    };
+
+    return this;
 };

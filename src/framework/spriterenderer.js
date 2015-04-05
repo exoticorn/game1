@@ -1,25 +1,25 @@
 export default function(gl, shaders) {
-    var BUFFER_SIZE = 1024;
-    var MAX_QUADS = Math.floor(BUFFER_SIZE / 6 / 4);
-    var STATE_NONE = 0;
-    var STATE_PLAIN = 1;
-    var STATE_TEXTURED = 2;
+    let BUFFER_SIZE = 1024;
+    let MAX_QUADS = Math.floor(BUFFER_SIZE / 6 / 4);
+    let STATE_NONE = 0;
+    let STATE_PLAIN = 1;
+    let STATE_TEXTURED = 2;
     
-    var plainShader = shaders.get('spritePlain');
-    var spriteShader = shaders.get('sprite');
+    let plainShader = shaders.get('spritePlain');
+    let spriteShader = shaders.get('sprite');
 
-    var state = STATE_NONE;
-    var currentTexture = -1;
-    var shader;
-    var vertexData = new Float32Array(BUFFER_SIZE);
-    var vertexData512 = vertexData.subarray(0, 512);
-    var vertexData256 = vertexData.subarray(0, 256);
-    var vertexData128 = vertexData.subarray(0, 128);
-    var vertexData64 = vertexData.subarray(0, 64);
-    var vertexData32 = vertexData.subarray(0, 32);
-    var vertexBuffer = gl.createBuffer();
-    var indexData = new Uint8Array(MAX_QUADS * 6);
-    for(var i = 0; i < MAX_QUADS; ++i) {
+    let state = STATE_NONE;
+    let shader;
+    let currentTexture = -1;
+    let vertexData = new Float32Array(BUFFER_SIZE);
+    let vertexData512 = vertexData.subarray(0, 512);
+    let vertexData256 = vertexData.subarray(0, 256);
+    let vertexData128 = vertexData.subarray(0, 128);
+    let vertexData64 = vertexData.subarray(0, 64);
+    let vertexData32 = vertexData.subarray(0, 32);
+    let vertexBuffer = gl.createBuffer();
+    let indexData = new Uint8Array(MAX_QUADS * 6);
+    for(let i = 0; i < MAX_QUADS; ++i) {
         indexData[i*6+0] = i*4+0;
         indexData[i*6+1] = i*4+1;
         indexData[i*6+2] = i*4+2;
@@ -27,13 +27,13 @@ export default function(gl, shaders) {
         indexData[i*6+4] = i*4+3;
         indexData[i*6+5] = i*4+2;
     }
-    var indexBuffer = gl.createBuffer();
+    let indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
     
-    var offset = 0;
-    var screenWidth = 1;
-    var screenHeight = 1;
+    let offset = 0;
+    let screenWidth = 1;
+    let screenHeight = 1;
     
     function bufferData() {
         if(offset > 128) {
@@ -142,17 +142,17 @@ export default function(gl, shaders) {
             g = r[1];
             r = r[0];
         }
-        var u0, v0, u1, v1;
+        let u0, v0, u1, v1;
         if(texture.frames === undefined) {
             u0 = 0, v0 = 0, u1 = 1, v1 = 1;
         } else {
-            var o = frame * 4;
+            let o = frame * 4;
             u0 = texture.frames[o];
             v0 = texture.frames[o+1];
             u1 = texture.frames[o+2];
             v1 = texture.frames[o+3];
         }
-        var w = texture.frameWidth, h = texture.frameHeight;
+        let w = texture.frameWidth, h = texture.frameHeight;
         if(state !== STATE_TEXTURED || currentTexture !== texture.texture || offset + 32 > BUFFER_SIZE) {
             this.flush();
         }

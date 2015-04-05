@@ -1,18 +1,18 @@
-import newGame from './game/game.js';
-import Shaders from './framework/shaders.js';
-import io from './framework/io.js';
-import async from './framework/async.js';
-import Keyboard from './framework/keyboard.js';
+import Game from './game/game';
+import Shaders from './framework/shaders';
+import io from './framework/io';
+import async from './framework/async';
+import Keyboard from './framework/keyboard';
 
-var screen = document.getElementById('screen');
-var gl = screen.getContext('webgl', {alpha: false}) || screen.getContext('experimental-webgl');
+let screen = document.getElementById('screen');
+let gl = screen.getContext('webgl', {alpha: false}) || screen.getContext('experimental-webgl');
 if(!gl) {
     io.error('Failed to create WebGL context!\n\nDoes your browser support WebGL?\nTry a recent version of Firefox, Chrome or Opera.\nIE >= 11 and Safari >= 8 should also work.');
 }
 
 let start = async.proc(function* () {
-    var shaders = yield Shaders.load(gl, 'src/framework/shaders.glsl');
-    var game = yield* newGame(gl, shaders);
+    let shaders = yield Shaders.load(gl, 'src/framework/shaders.glsl');
+    let game = yield* new Game(gl, shaders);
     
     function resizeScreen() {
         screen.width = window.innerWidth;
@@ -23,13 +23,13 @@ let start = async.proc(function* () {
     resizeScreen();
     window.addEventListener('resize', resizeScreen, false);
     
-    var updateContext = {
+    let updateContext = {
         timeStep: 0,
         keyboard: new Keyboard()
     };
     
-    var isPaused = false;
-    var lastTime = Date.now();
+    let isPaused = false;
+    let lastTime = Date.now();
     function requestFrame() {
         if(!isPaused) {
             window.requestAnimationFrame(update);
@@ -37,7 +37,7 @@ let start = async.proc(function* () {
     }
     
     function onKey(e) {
-        var pressed = e.type === 'keydown';
+        let pressed = e.type === 'keydown';
         if(e.keyCode === 80 && e.type === 'keydown') {
             isPaused = !isPaused;
             lastTime = Date.now();
@@ -52,7 +52,7 @@ let start = async.proc(function* () {
     document.addEventListener('keyup', onKey, false);
     
     function update() {
-        var time = Date.now();
+        let time = Date.now();
         updateContext.timeStep = Math.min(1 / 10, (time - lastTime) / 1000);
         lastTime =time;
         if(updateContext.timeStep > 0) {

@@ -1,5 +1,5 @@
 export default function Keyboard() {
-    var state = new Uint8Array(256);
+    let state = new Uint8Array(256);
     this.handleEvent = function(e) {
         if(e.keyCode >= 256) {
             return;
@@ -12,7 +12,7 @@ export default function Keyboard() {
     };
     
     this.endFrame = function() {
-        for(var i = 0; i < 256; ++i) {
+        for(let i = 0; i < 256; ++i) {
             state[i] &= 1;
         }
     };

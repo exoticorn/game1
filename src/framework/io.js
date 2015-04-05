@@ -1,7 +1,7 @@
 export default {
     load: function(url, responseType) {
         return new Promise(function(resolve, reject) {
-            var request = new XMLHttpRequest();
+            let request = new XMLHttpRequest();
             request.open('GET', url);
             request.onreadystatechange = function() {
                 if(request.readyState === 4) {
@@ -17,7 +17,7 @@ export default {
         });
     },
     error: function(msg) {
-        var e = document.createElement('pre');
+        let e = document.createElement('pre');
         e.className = 'error';
         e.appendChild(document.createTextNode(msg));
         document.body.appendChild(e);

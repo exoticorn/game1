@@ -1,12 +1,13 @@
-import io from './io.js';
+import io from './io';
+import async from './async';
 
 export default function Shaders(gl, sources) {
-    var shaders = {};
-    var currentShader;
-    var currentPart;
-    var varyings;
-    sources.split('\n').forEach(function(line) {
-        var match = /^### (\w+)\s*$/.exec(line);
+    let shaders = {};
+    let currentShader;
+    let currentPart;
+    let varyings;
+    sources.split('\n').forEach(line => {
+        let match = /^### (\w+)\s*$/.exec(line);
         if(match) {
             currentShader = {};
             currentPart = [];
@@ -27,23 +28,23 @@ export default function Shaders(gl, sources) {
         }
     });
     
-    var shaderObjs = {};
+    let shaderObjs = {};
     this.get = function(name) {
         if(shaderObjs[name] !== undefined) {
             return shaderObjs[name];
         }
         
-        var sources = shaders[name];
+        let sources = shaders[name];
         if(sources === undefined) {
             io.error("No shader named '" + name + "' found!");
         }
         
         function compile(type, src) {
-            var shader = gl.createShader(type);
+            let shader = gl.createShader(type);
             gl.shaderSource(shader, src);
             gl.compileShader(shader);
             if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                var lines = [];
+                let lines = [];
                 src.split('\n').forEach(function(line) {
                     lines.push((lines.length + 1) + ': ' + line);
                 });
@@ -52,45 +53,45 @@ export default function Shaders(gl, sources) {
             return shader;
         }
         
-        var program = gl.createProgram();
+        let program = gl.createProgram();
         gl.attachShader(program, compile(gl.VERTEX_SHADER, sources.vertex.join('\n')));
         gl.attachShader(program, compile(gl.FRAGMENT_SHADER, sources.fragment.join('\n')));
         gl.linkProgram(program);
         if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
             io.error("Shader '" + name + "' link failed:\n" + gl.getProgramInfoLog(program));
         }
-        var shader = new Shader(program);
+        let shader = new Shader(program);
         shaderObjs[name] = shader;
         return shader;
     };
     
     function Shader(program) {
-        var i, numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-        for(i = 0; i < numAttributes; ++i) {
+        let numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+        for(let i = 0; i < numAttributes; ++i) {
             this[gl.getActiveAttrib(program, i).name] = i;
         }
-        for(i = 0; i < gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS); ++i) {
-            var name = gl.getActiveUniform(program, i).name;
+        for(let i = 0; i < gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS); ++i) {
+            let name = gl.getActiveUniform(program, i).name;
             this[name] = gl.getUniformLocation(program, name);
         }
         this.begin = function() {
             gl.useProgram(program);
-            for(var i = 0; i < numAttributes; ++i) {
+            for(let i = 0; i < numAttributes; ++i) {
                 gl.enableVertexAttribArray(i);
             }
         };
         this.end = function() {
-            for(var i = 0; i < numAttributes; ++i) {
+            for(let i = 0; i < numAttributes; ++i) {
                 gl.disableVertexAttribArray(i);
             }
         };
     }
 };
 
-Shaders.load = function(gl, url) {
-    return io.load(url).then(function(src) {
-        return new Shaders(gl, src);
-    }).catch(function(err) {
+Shaders.load = async(function*(gl, url) {
+    try {
+        return new Shaders(gl, yield io.load(url));
+    } catch(err) {
         io.error('Loading shaders failed: ' + err);
-    });
-};
+    }
+});
