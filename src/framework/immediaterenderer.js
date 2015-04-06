@@ -32,12 +32,12 @@ export default function ImmediateRenderer(gl, shader) {
     }
 
     function add4(offset) {
-        return (x, y, z, w) => {
-            let o = self.offset + offset;
-            self.vertexData[o] = x;
-            self.vertexData[o+1] = y;
-            self.vertexData[o+2] = z;
-            self.vertexData[o+3] = w;
+        return function(x, y, z, w) {
+            let o = this.offset + offset;
+            this.vertexData[o] = x;
+            this.vertexData[o+1] = y;
+            this.vertexData[o+2] = z;
+            this.vertexData[o+3] = w;
         };
     }
 
@@ -64,50 +64,74 @@ export default function ImmediateRenderer(gl, shader) {
 
     let maxVertices = 256;
     this.vertexData = new Float32Array(maxVertices * vertexSize);
-    this.vertexData128 = this.vertexData.subarray(0, 128 * vertexSize);
-    this.vertexData64 = this.vertexData.subarray(0, 64 * vertexSize);
-    this.vertexData32 = this.vertexData.subarray(0, 32 * vertexSize);
-    this.vertexData16 = this.vertexData.subarray(0, 16 * vertexSize);
-    this.vertexData8 = this.vertexData.subarray(0, 8 * vertexSize);
-    this.vertexBuffer = gl.createBuffer();
+    let vertexData128 = this.vertexData.subarray(0, 128 * vertexSize);
+    let vertexData64 = this.vertexData.subarray(0, 64 * vertexSize);
+    let vertexData32 = this.vertexData.subarray(0, 32 * vertexSize);
+    let vertexData16 = this.vertexData.subarray(0, 16 * vertexSize);
+    let vertexData8 = this.vertexData.subarray(0, 8 * vertexSize);
+    let vertexBuffer = gl.createBuffer();
 
     this.shader = shader;
-    this.offset = 0;
-    this.numVertices = 0;
+    let numVertices = 0;
+    let primitiveType;
 
     this.begin = function() {
         shader.begin();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         for(let s of setups) {
             s();
         }
     };
 
-    this.beginPrimitive = function() {
+    this.beginPrimitive = function(type) {
         this.offset = 0;
-        this.numVertices = 0;
+        numVertices = 0;
+        primitiveType = type;
     };
 
     this.done = function() {
         this.offset += vertexSize;
-        this.numVertices += 1;
+        numVertices += 1;
+        if(numVertices >= maxVertices) {
+            let draw = numVertices;
+            let copy = 0;
+            switch(primitiveType) {
+            case gl.TRIANGLES:
+                draw = Math.floor(draw / 3) * 3;
+                copy = numVertices - draw;
+                break;
+            case gl.TRIANGLE_STRIP:
+                copy = 2;
+                break;
+            }
+            let copyStart = (numVertices - copy) * vertexSize;
+            numVertices = draw;
+            this.endPrimitive();
+            this.beginPrimitive(primitiveType);
+            let copyCount = copy * vertexSize;
+            for(let i = 0; i < copyCount; ++i) {
+                this.vertexData[i] = this.vertexData[copyStart + i];
+            }
+            this.offset = copyCount;
+            numVertices = copy;
+        }
     };
 
     this.endPrimitive = function() {
-        if(this.numVertices <= 8) {
-            gl.bufferData(gl.ARRAY_BUFFER, this.vertexData8, gl.DYNAMIC_DRAW);
-        } else if(this.numVertices <= 16) {
-            gl.bufferData(gl.ARRAY_BUFFER, this.vertexData16, gl.DYNAMIC_DRAW);
-        } else if(this.numVertices <= 32) {
-            gl.bufferData(gl.ARRAY_BUFFER, this.vertexData32, gl.DYNAMIC_DRAW);
-        } else if(this.numVertices <= 64) {
-            gl.bufferData(gl.ARRAY_BUFFER, this.vertexData64, gl.DYNAMIC_DRAW);
-        } else if(this.numVertices <= 128) {
-            gl.bufferData(gl.ARRAY_BUFFER, this.vertexData128, gl.DYNAMIC_DRAW);
+        if(numVertices <= 8) {
+            gl.bufferData(gl.ARRAY_BUFFER, vertexData8, gl.DYNAMIC_DRAW);
+        } else if(numVertices <= 16) {
+            gl.bufferData(gl.ARRAY_BUFFER, vertexData16, gl.DYNAMIC_DRAW);
+        } else if(numVertices <= 32) {
+            gl.bufferData(gl.ARRAY_BUFFER, vertexData32, gl.DYNAMIC_DRAW);
+        } else if(numVertices <= 64) {
+            gl.bufferData(gl.ARRAY_BUFFER, vertexData64, gl.DYNAMIC_DRAW);
+        } else if(numVertices <= 128) {
+            gl.bufferData(gl.ARRAY_BUFFER, vertexData128, gl.DYNAMIC_DRAW);
         } else {
             gl.bufferData(gl.ARRAY_BUFFER, this.vertexData, gl.DYNAMIC_DRAW);
         }
-        gl.drawArrays(gl.TRIANGLES, 0, this.numVertices);
+        gl.drawArrays(primitiveType, 0, numVertices);
     };
 
     this.end = function() {

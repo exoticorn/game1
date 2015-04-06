@@ -16,9 +16,12 @@ export default function* Game(gl, frameworkShaders) {
     gl.clear(gl.COLOR_BUFFER_BIT);
     
     let spriteRenderer = new SpriteRenderer(gl, frameworkShaders);
+
+    let time = 0;
     
     this.update = function(ctx) {
         player.update(ctx);
+        time += ctx.timeStep;
     };
     
     this.render = function() {
@@ -31,11 +34,14 @@ export default function* Game(gl, frameworkShaders) {
         spriteRenderer.end();
 
         testRenderer.begin();
-        gl.uniform1f(testRenderer.time, 0);
-        testRenderer.beginPrimitive();
-        testRenderer.pos(0.25, -0.5, 1).done();
-        testRenderer.pos(0.75, -0.5, 1).done();
-        testRenderer.pos(0.5, 0.5, 1).done();
+        gl.uniform1f(testRenderer.shader.time, time);
+        testRenderer.beginPrimitive(gl.TRIANGLES);
+        for(let i = 0; i < 100; ++i) {
+            let y = -1 + i / 50;
+            testRenderer.pos(0.1, y, 1).done();
+            testRenderer.pos(0.2, y, 1).done();
+            testRenderer.pos(0.15, y + 0.01, 1).done();
+        }
         testRenderer.endPrimitive();
         testRenderer.end();
     };
