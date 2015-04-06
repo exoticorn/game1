@@ -1,6 +1,7 @@
 import SpriteRenderer from '../framework/spriterenderer';
 import ResourceManager from '../framework/resourcemanager';
 import Texture from '../framework/texture';
+import TxtGfx from '../framework/txtgfx';
 import Shaders from '../framework/shaders';
 import Player from './player.js';
 import ImmediateRenderer from '../framework/immediaterenderer';
@@ -8,6 +9,7 @@ import ImmediateRenderer from '../framework/immediaterenderer';
 export default function* Game(gl, frameworkShaders) {
     let resourceManager = new ResourceManager(gl);
     let texture = yield resourceManager.load(Texture, 'gfx/pulse.png', { frames: 4, scale: 2 });
+    let gfx = yield resourceManager.load(TxtGfx, 'src/game/gfx.txt', { scale: 8 });
     let shaders = yield Shaders.load(gl, 'src/game/shaders.glsl');
     let player = new Player(gl);
     let testRenderer = new ImmediateRenderer(gl, shaders.get('stars'));
@@ -29,7 +31,7 @@ export default function* Game(gl, frameworkShaders) {
         
         spriteRenderer.begin();
         
-        player.render(spriteRenderer);
+        player.render(spriteRenderer, gfx.hero);
 
         spriteRenderer.end();
 

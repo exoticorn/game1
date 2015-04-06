@@ -25,7 +25,7 @@ export default function Player(gl) {
         }
     };
     
-    this.render = function(renderer) {
-        renderer.drawPlain(this.pos[0] - 16, this.pos[1] - 16 + 500, 32, 32, 1, 1, 1, 1);
+    this.render = function(renderer, texture) {
+        renderer.draw(this.pos[0] - 16, this.pos[1] - 16 + 500, texture, 1, 1, 1, 1);
     };
 };
