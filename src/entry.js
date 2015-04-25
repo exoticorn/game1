@@ -4,7 +4,8 @@ import io from './framework/io';
 import async from './framework/async';
 import Keyboard from './framework/keyboard';
 
-let screen = document.getElementById('screen');
+let screen = document.createElement('canvas');
+document.body.appendChild(screen);
 let gl = screen.getContext('webgl', {alpha: false}) || screen.getContext('experimental-webgl');
 if(!gl) {
     io.error('Failed to create WebGL context!\n\nDoes your browser support WebGL?\nTry a recent version of Firefox, Chrome or Opera.\nIE >= 11 and Safari >= 8 should also work.');

@@ -53,9 +53,9 @@ export default function(gl, shaders) {
         }
     }
 
-    this.begin = function() {
-        screenWidth = gl.drawingBufferWidth;
-        screenHeight = gl.drawingBufferHeight;
+    this.begin = function(screen) {
+        screenWidth = screen && screen.width || gl.drawingBufferWidth;
+        screenHeight = screen && screen.height || gl.drawingBufferHeight;
         state = STATE_NONE;
         offset = 0;
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -101,7 +101,7 @@ export default function(gl, shaders) {
             }
             shader = plainShader;
             plainShader.begin();
-            gl.uniform4f(plainShader.transform, 2 / (screenWidth - 1), -2 / (screenHeight - 1), -1, 1);
+            gl.uniform4f(plainShader.transform, 2 / screenWidth, -2 / screenHeight, -1, 1);
             gl.vertexAttribPointer(plainShader.pos, 2, gl.FLOAT, false, 24, 0);
             gl.vertexAttribPointer(plainShader.color, 4, gl.FLOAT, false, 24, 8);
             state = STATE_PLAIN;
@@ -136,12 +136,16 @@ export default function(gl, shaders) {
         this.drawFrame(x, y, texture, 0, r, g, b, a);
     };
     this.drawFrame = function(x, y, texture, frame, r, g, b, a) {
-        if(g === undefined) {
+        if(r === undefined) {
+            r = g = b = a = 1;
+        } else if(g === undefined) {
             a = r[3];
             b = r[2];
             g = r[1];
             r = r[0];
         }
+        x = Math.floor(x);
+        y = Math.floor(y);
         let u0, v0, u1, v1;
         if(texture.frames === undefined) {
             u0 = 0, v0 = 0, u1 = 1, v1 = 1;
@@ -162,7 +166,7 @@ export default function(gl, shaders) {
             }
             shader = spriteShader;
             spriteShader.begin();
-            gl.uniform4f(spriteShader.transform, 2 / (screenWidth - 1), -2 / (screenHeight - 1), -1, 1);
+            gl.uniform4f(spriteShader.transform, 2 / screenWidth, -2 / screenHeight, -1, 1);
             gl.vertexAttribPointer(spriteShader.pos, 2, gl.FLOAT, false, 32, 0);
             gl.vertexAttribPointer(spriteShader.color, 4, gl.FLOAT, false, 32, 8);
             gl.vertexAttribPointer(spriteShader.uv, 2, gl.FLOAT, false, 32, 24);
