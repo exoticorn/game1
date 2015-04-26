@@ -83,3 +83,26 @@ void main() {
   color += sampleBlur(vpos + vec2(-1.5 + sin(vpos.y * 4.0) * 0.25, 0.0)) * 0.5;
   gl_FragColor = color * 0.25;
 }
+
+### tilemap
+varying highp vec2 vUv;
+
+attribute vec2 pos;
+attribute vec2 uv;
+
+void main() {
+     gl_Position = vec4(pos, 0.0, 1.0);
+     vUv = uv;
+}
+---
+uniform sampler2D tileMap;
+uniform sampler2D tileSet;
+uniform vec4 color;
+uniform vec2 mapScale;
+uniform vec2 setScale;
+
+void main() {
+     vec2 tile = texture2D(tileMap, (floor(vUv) + 0.5) * mapScale).xy * 255.0;
+     vec2 uv = tile - vec2(0.0, 1.0) + fract(vUv);
+     gl_FragColor = texture2D(tileSet, uv * setScale) * color * step(1.0, tile.y);
+}

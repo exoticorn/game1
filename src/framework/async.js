@@ -36,3 +36,7 @@ async.proc = function(gen) {
     };
 };
 
+async.go = function(gen, self) {
+    async.proc(gen).apply(self);
+};
+

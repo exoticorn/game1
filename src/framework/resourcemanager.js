@@ -6,7 +6,7 @@ export default function(gl) {
     
     let total = 0;
     let loaded = 0;
-    
+
     this.load = function(factory, name, config) {
         let resource = resources[name];
         if(resource) {
@@ -15,7 +15,7 @@ export default function(gl) {
         resource = factory(name, gl, config);
         if(resource.then !== undefined) {
             total += 1;
-            resource.then(function() {
+            resource.then(() => {
                 loaded += 1;
             }, function(err) {
                 io.error("Loading resource '" + name + "' failed:\n" + err);
