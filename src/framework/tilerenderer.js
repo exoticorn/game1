@@ -34,11 +34,16 @@ export default class TileRenderer {
         gl.uniform2fv(shader.mapScale, tileMap.uvScale);
         gl.uniform2fv(shader.setScale, tileSet.uvScale);
 
+        let u0 = offset[0];
+        let v0 = offset[1];
+        let u1 = u0 + screenWidth / tileSet.tileSize / zoom;
+        let v1 = v0 + screenHeight / tileSet.tileSize / zoom;
+
         renderer.beginPrimitive(gl.TRIANGLE_STRIP);
-        renderer.pos(-1, -1).uv(0, 10).done();
-        renderer.pos(1, -1).uv(10, 10).done();
-        renderer.pos(-1, 1).uv(0, 0).done();
-        renderer.pos(1, 1).uv(10, 0).done();
+        renderer.pos(-1, -1).uv(u0, v1).done();
+        renderer.pos(1, -1).uv(u1, v1).done();
+        renderer.pos(-1, 1).uv(u0, v0).done();
+        renderer.pos(1, 1).uv(u1, v0).done();
         renderer.endPrimitive();
         
         renderer.end();

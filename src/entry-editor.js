@@ -2,31 +2,28 @@ import React from 'react';
 import GlView from './editor-framework/glview';
 import async from './framework/async';
 import GameResources from './game/resources';
-import TileMap from './framework/tilemap';
-import TileRenderer from './framework/tilerenderer';
 import Shaders from './framework/shaders';
+import TileEditor from './editor-framework/tileeditor';
 
 class Editor extends React.Component {
     init(gl) {
+        gl.enable(gl.BLEND);
+        gl.blendEquation(gl.FUNC_ADD);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         async.go(function*() {
             this.gameResources = yield new GameResources(gl);
             this.shaders = yield Shaders.load(gl, 'src/framework/shaders.glsl');
-            this.tileMap = new TileMap(gl, this.gameResources.tileSet, 10, 10);
-            for(let y = 0; y < 10; ++y) {
-                for(let x = 0; x < 10; ++x) {
-                    this.tileMap.set(x, y, Math.floor(Math.random() * 5));
-                }
-            }
-            this.renderer = new TileRenderer(gl, this.shaders.get('tilemap'));
+            this.context = { gl: gl, shaders: this.shaders };
+            this.tileEditor = new TileEditor(this.context, this.gameResources.tileSet);
         }, this);
     }
 
     update(gl) {
-        gl.clearColor(1, 0, 1, 1);
+        gl.clearColor(0.2, 0.21, 0.23, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        if(this.renderer) {
-            this.renderer.render(this.gameResources.tileSet, this.tileMap, [0, 0]);
+        if(this.tileEditor) {
+            this.tileEditor.render();
         }
     }
 

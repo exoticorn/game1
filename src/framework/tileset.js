@@ -6,5 +6,6 @@ export default class TileSet {
         this.uvScale = new Float32Array(2);
         this.uvScale[0] = 1 / tilesX;
         this.uvScale[1] = 1 / tilesY;
+        this.tileSize = texture.width / tilesX;
     }
 }

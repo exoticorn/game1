@@ -102,7 +102,9 @@ uniform vec2 mapScale;
 uniform vec2 setScale;
 
 void main() {
-     vec2 tile = texture2D(tileMap, (floor(vUv) + 0.5) * mapScale).xy * 255.0;
+     vec2 mapUv = (floor(vUv) + 0.5) * mapScale;
+     vec2 mask = step(0.0, mapUv) * step(-1.0, -mapUv);
+     vec2 tile = texture2D(tileMap, mapUv).xy * 255.0;
      vec2 uv = tile - vec2(0.0, 1.0) + fract(vUv);
-     gl_FragColor = texture2D(tileSet, uv * setScale) * color * step(1.0, tile.y);
+     gl_FragColor = texture2D(tileSet, uv * setScale) * color * (step(1.0, tile.y) * mask.x * mask.y);
 }
