@@ -3,7 +3,7 @@ import GlView from './editor-framework/glview';
 import async from './framework/async';
 import GameResources from './game/resources';
 import Shaders from './framework/shaders';
-import TileEditor from './editor-framework/tileeditor';
+import MapEditor from './editor-framework/mapeditor';
 
 class Editor extends React.Component {
     init(gl) {
@@ -14,7 +14,7 @@ class Editor extends React.Component {
             this.gameResources = yield new GameResources(gl);
             this.shaders = yield Shaders.load(gl, 'src/framework/shaders.glsl');
             this.context = { gl: gl, shaders: this.shaders };
-            this.tileEditor = new TileEditor(this.context, this.gameResources.tileSet);
+            this.mapEditor = new MapEditor(this.context, this.gameResources.tileSet);
         }, this);
     }
 
@@ -22,13 +22,19 @@ class Editor extends React.Component {
         gl.clearColor(0.2, 0.21, 0.23, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        if(this.tileEditor) {
-            this.tileEditor.render();
+        if(this.mapEditor) {
+            this.mapEditor.render();
+        }
+    }
+
+    input(type, e) {
+        if(this.mapEditor) {
+            this.mapEditor.input(type, e);
         }
     }
 
     render() {
-        return <GlView onInit={this.init.bind(this)} onFrame={this.update.bind(this)} />;
+        return <GlView onInit={this.init.bind(this)} onFrame={this.update.bind(this)} onInput={this.input.bind(this)} />;
     }
 }
 

@@ -27,7 +27,20 @@ export default class GlView extends React.Component {
         }
         window.requestAnimationFrame(this.update.bind(this));
     }
+    mouseEvent(type, e) {
+        if(this.props.onInput) {
+            let rect = this.canvas.getBoundingClientRect();
+            e.x = e.clientX - rect.left;
+            e.y = e.clientY - rect.top;
+            this.props.onInput(type, e);
+        }
+    }
     render() {
-        return <canvas className={this.props.className} style={this.props.style || {width: '100%', height: '100%'}} ref='canvas' />;
+        return <canvas className={this.props.className}
+                       style={this.props.style || {width: '100%', height: '100%'}}
+                       ref='canvas'
+                       onMouseUp={(e) => this.mouseEvent('mouseup', e)}
+                       onMouseDown={(e) => this.mouseEvent('mousedown', e)}
+                       onMouseMove={(e) => this.mouseEvent('mousemove', e)} />;
     }
 }
