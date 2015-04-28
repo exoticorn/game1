@@ -108,3 +108,18 @@ void main() {
      vec2 uv = tile - vec2(0.0, 1.0) + fract(vUv);
      gl_FragColor = texture2D(tileSet, uv * setScale) * color * (step(1.0, tile.y) * mask.x * mask.y);
 }
+
+### shape
+
+attribute vec2 pos;
+uniform vec4 transform;
+
+void main() {
+     gl_Position = vec4(pos * transform.xy + transform.zw, 0.0, 1.0);
+}
+---
+uniform vec4 color;
+
+void main() {
+     gl_FragColor = color;
+}
