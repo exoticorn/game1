@@ -34,13 +34,22 @@ export default class GlView extends React.Component {
             e.y = e.clientY - rect.top;
             this.props.onInput(type, e);
         }
+        this.canvas.focus();
+    }
+    keyEvent(type, e) {
+        if(this.props.onInput) {
+            this.props.onInput(type, e);
+        }
     }
     render() {
         return <canvas className={this.props.className}
                        style={this.props.style || {width: '100%', height: '100%'}}
                        ref='canvas'
+                       tabIndex="1"
                        onMouseUp={(e) => this.mouseEvent('mouseup', e)}
                        onMouseDown={(e) => this.mouseEvent('mousedown', e)}
-                       onMouseMove={(e) => this.mouseEvent('mousemove', e)} />;
+                       onMouseMove={(e) => this.mouseEvent('mousemove', e)}
+                       onKeyDown={(e) => this.keyEvent('keydown', e)}
+                       onKeyUp={(e) => this.keyEvent('keyup', e)} />;
     }
 }

@@ -1,6 +1,7 @@
 import TileMap from '../framework/tilemap';
 import TileRenderer from '../framework/tilerenderer';
 import ShapeRenderer from '../framework/shaperenderer';
+import Keyboard from '../framework/keyboard';
 import M from '../3rd-party/gl-matrix-min';
 
 export default class MapEditor {
@@ -11,6 +12,7 @@ export default class MapEditor {
         this.shapes = new ShapeRenderer(context);
         this.tileMap = new TileMap(this.gl, tileSet, 40, 20);
         this.scroll = M.vec2.clone([0, 0]);
+        this.mousePos = M.vec2.clone([0, 0]);
         this.zoom = 8;
         for(let y = 0; y < 20; ++y) {
             for(let x = 0; x < 40; ++x) {
@@ -32,19 +34,21 @@ export default class MapEditor {
     }
 
     input(type, e) {
-        let pos = [e.x, e.y];
+        if(type === 'mousedown' || type === 'mouseup' || type === 'mousemove') {
+            M.vec2.set(this.mousePos, e.x, e.y);
+        }
         let tileSize = this.tileSet.tileSize * this.zoom;
-        let tilePos = [Math.floor(e.x / tileSize + this.scroll[0]), Math.floor(e.y / tileSize + this.scroll[1])];
+        let tilePos = [Math.floor(this.mousePos[0] / tileSize + this.scroll[0]), Math.floor(this.mousePos[1] / tileSize + this.scroll[1])];
         this.selection = tilePos;
-        if(type === 'mousedown') {
-            this.scrollDrag = [e.x, e.y];
+        if(type === 'mousedown' || (type === 'keydown' && e.keyCode === Keyboard.G)) {
+            this.scrollDrag = [this.mousePos[0], this.mousePos[1]];
         } else if(type === 'mousemove') {
             if(this.scrollDrag) {
-                M.vec2.scaleAndAdd(this.scroll, this.scroll, pos, -0.125);
+                M.vec2.scaleAndAdd(this.scroll, this.scroll, this.mousePos, -0.125);
                 M.vec2.scaleAndAdd(this.scroll, this.scroll, this.scrollDrag, 0.125);
-                this.scrollDrag = pos;
+                this.scrollDrag = M.vec2.clone(this.mousePos);
             }
-        } else if(type === 'mouseup') {
+        } else if(type === 'mouseup' || (type === 'keyup' && e.keyCode === Keyboard.G)) {
             delete this.scrollDrag;
         }
     }
