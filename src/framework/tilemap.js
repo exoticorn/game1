@@ -5,6 +5,7 @@ export default class TileMap {
         this.width = width;
         this.height = height;
         this.data = new Uint8Array(width * height * 4);
+        this.map = new Uint16Array(width * height);
         this.texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -17,15 +18,55 @@ export default class TileMap {
         this.dirty = true;
     }
 
+    destroy() {
+        this.gl.deleteTexture(this.texture);
+    }
+
+    copy(x, y, width, height) {
+        let x2 = Math.min(x + width, this.width);
+        let y2 = Math.min(y + height, this.height);
+        x = Math.max(x, 0);
+        y = Math.max(y, 0);
+        width = x2 - x;
+        height = y2 - y;
+        if(width < 1 || height < 1) {
+            return null;
+        }
+        let map = new TileMap(this.gl, this.tileset, width, height);
+        for(let yi = 0; yi < height; ++yi) {
+            for(let xi = 0; xi < width; ++xi) {
+                map.set(xi, yi, this.get(x + xi, y + yi));
+            }
+        }
+        return map;
+    }
+
+    put(brush, x, y) {
+        let w = brush.width, h = brush.height;
+        for(let yi = 0; yi < h; ++yi) {
+            for(let xi = 0; xi < w; ++xi) {
+                this.set(x + xi, y + yi, brush.get(xi, yi));
+            }
+        }
+    }
+
     set(x, y, index) {
         if(x >= 0 && y >= 0 && x < this.width && y < this.height) {
-            let offset = (x + y * this.width) * 4;
+            let offset = x + y * this.width;
             let data = this.data;
-            index += this.tileset.tilesX - 1;
-            data[offset+0] = index % this.tileset.tilesX;
-            data[offset+1] = Math.floor(index / this.tileset.tilesX);
+            let i = index + this.tileset.tilesX - 1;
+            data[offset*4+0] = i % this.tileset.tilesX;
+            data[offset*4+1] = Math.floor(i / this.tileset.tilesX);
+            this.map[offset] = index;
             this.dirty = true;
         }
+    }
+
+    get(x, y) {
+        if(x < 0 || x >= this.width || y < 0 || y >= this.height) {
+            return 0;
+        }
+        return this.map[x + y * this.width];
     }
 
     use() {

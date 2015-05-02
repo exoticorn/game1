@@ -19,7 +19,7 @@ class Editor extends React.Component {
     }
 
     update(gl) {
-        gl.clearColor(0.2, 0.21, 0.23, 1);
+        gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         if(this.mapEditor) {

@@ -19,6 +19,7 @@ export default class MapEditor {
                 this.tileMap.set(x, y, Math.floor(Math.random() * 5));
             }
         }
+        this.brush = this.tileMap.copy(2, 1, 3, 2);
     }
 
     render() {
@@ -31,6 +32,32 @@ export default class MapEditor {
             this.shapes.drawRect(this.selection[0], this.selection[1], 1, 1, [0.2, 0.1, 0, 1]);
         }
         this.shapes.end();
+        if(this.brush) {
+            let brushPos = this.brushPos();
+            this.shapes.begin();
+            this.shapes.fillRect(brushPos[0], brushPos[1], this.brush.width, this.brush.height, [0, 0, 0, 0.8]);
+            this.shapes.end();
+            M.vec2.sub(brushPos, this.scroll, brushPos);
+            this.renderer.render(this.tileSet, this.brush, brushPos, this.zoom);
+        }
+    }
+
+    brushPos() {
+        let w = 1, h = 1;
+        if(this.brush) {
+            w = this.brush.width;
+            h = this.brush.height;
+        }
+        let tileSize = this.tileSet.tileSize * this.zoom;
+        return [
+            Math.floor(this.mousePos[0] / tileSize + this.scroll[0] - w/2 + 0.5),
+            Math.floor(this.mousePos[1] / tileSize + this.scroll[1] - h/2 + 0.5)
+        ];
+    }
+
+    putBrush() {
+        let brushPos = this.brushPos();
+        this.tileMap.put(this.brush, brushPos[0], brushPos[1]);
     }
 
     input(type, e) {
@@ -40,16 +67,22 @@ export default class MapEditor {
         let tileSize = this.tileSet.tileSize * this.zoom;
         let tilePos = [Math.floor(this.mousePos[0] / tileSize + this.scroll[0]), Math.floor(this.mousePos[1] / tileSize + this.scroll[1])];
         this.selection = tilePos;
-        if(type === 'mousedown' || (type === 'keydown' && e.keyCode === Keyboard.G)) {
+        if((type === 'mousedown' && this.button === 2) || (type === 'keydown' && e.keyCode === Keyboard.G)) {
             this.scrollDrag = [this.mousePos[0], this.mousePos[1]];
+        } else if(type === 'mousedown') {
+            this.putBrush();
+            this.drawing = true;
         } else if(type === 'mousemove') {
             if(this.scrollDrag) {
                 M.vec2.scaleAndAdd(this.scroll, this.scroll, this.mousePos, -0.125);
                 M.vec2.scaleAndAdd(this.scroll, this.scroll, this.scrollDrag, 0.125);
                 this.scrollDrag = M.vec2.clone(this.mousePos);
+            } else if(this.drawing) {
+                this.putBrush();
             }
         } else if(type === 'mouseup' || (type === 'keyup' && e.keyCode === Keyboard.G)) {
             delete this.scrollDrag;
+            this.drawing = false;
         }
     }
 }
