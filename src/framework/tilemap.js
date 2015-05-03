@@ -50,6 +50,14 @@ export default class TileMap {
         }
     }
 
+    clear(x, y, w, h) {
+        for(let yi = 0; yi < h; ++yi) {
+            for(let xi = 0; xi < w; ++xi) {
+                this.set(x + xi, y + yi, 0);
+            }
+        }
+    }
+
     set(x, y, index) {
         if(x >= 0 && y >= 0 && x < this.width && y < this.height) {
             let offset = x + y * this.width;
