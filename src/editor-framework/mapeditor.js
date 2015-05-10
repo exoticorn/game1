@@ -10,7 +10,8 @@ export default class MapEditor {
         this.tileSet = tileSet;
         this.renderer = new TileRenderer(this.gl, context.shaders.get('tilemap'));
         this.shapes = new ShapeRenderer(context);
-        this.tileMap = new TileMap(this.gl, tileSet, 40, 20);
+        let mapData = localStorage.getItem('mapeditor-data');
+        this.tileMap = mapData ? TileMap.fromDump(this.gl, tileSet, JSON.parse(mapData)) : new TileMap(this.gl, tileSet, 40, 20);
         this.scroll = M.vec2.clone([0, 0]);
         this.mousePos = M.vec2.clone([0, 0]);
         this.zoom = 8;
@@ -77,8 +78,18 @@ export default class MapEditor {
         }
     }
 
+    switchToGame() {
+        localStorage.setItem('mapeditor-data', JSON.stringify(this.tileMap.dump()));
+        console.log('saved');
+    }
+
     input(type, e) {
         // wow, what a mess. please re-write me...
+        if(type === 'keydown' && e.keyCode === Keyboard.S && e.ctrlKey) {
+            e.preventDefault();
+            this.switchToGame();
+            return;
+        }
         if(type === 'mousedown' || type === 'mouseup' || type === 'mousemove') {
             M.vec2.set(this.mousePos, e.x, e.y);
         }

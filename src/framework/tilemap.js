@@ -22,6 +22,15 @@ export default class TileMap {
         this.gl.deleteTexture(this.texture);
     }
 
+    dump() {
+        return {
+            time: Date.now(),
+            width: this.width,
+            height: this.height,
+            data: Array.from(this.map)
+        };
+    }
+
     copy(x, y, width, height) {
         let x2 = Math.min(x + width, this.width);
         let y2 = Math.min(y + height, this.height);
@@ -85,4 +94,14 @@ export default class TileMap {
             this.dirty = false;
         }
     }
+}
+
+TileMap.fromDump = function(gl, tileSet, dump) {
+    let map = new TileMap(gl, tileSet, dump.width, dump.height);
+    for(let y = 0; y < dump.height; ++y) {
+        for(let x = 0; x < dump.width; ++x) {
+            map.set(x, y, dump.data[x + y * dump.width]);
+        }
+    }
+    return map;
 }
